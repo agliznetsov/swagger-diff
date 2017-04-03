@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+
+    <style>
+        .title {
+        }
+
+        h2 {
+            color: #999999;
+        }
+
+        .body {
+            line-height: 1;
+            font-family: "Droid Sans", sans-serif;
+            min-width: 760px;
+            max-width: 960px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .section {
+            font-size: large;
+            font-weight: bold;
+            margin-top: 40px;
+            width: 100%;
+            padding: 10px;
+            background-color: #EEEEEE;
+        }
+
+        .operation {
+            padding: 5px;
+            background-color: #e7f0f7;
+            border: 1px solid #c3d9ec;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .operationId {
+            color: #0f6ab4;
+            float: right;
+            font-weight: bold;
+        }
+
+        .changes {
+            margin-left: 20px;
+            width: calc(100% - 20px);
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th {
+            color: #999999;
+            font-weight: normal;
+        }
+
+        table, th, td {
+            border: 1px solid gray;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .breaking[breaking="true"]:before {
+            font-weight: bold;
+            content: " ! ";
+            color: red;
+        }
+
+        .changeType {
+            color: white;
+            display: inline-block;
+            width: 60px;
+            font-size: 0.7em;
+            text-align: center;
+            padding: 7px 0 4px;
+            border-radius: 2px;
+        }
+
+        .changeType.ADD {
+            background-color: #10a54a;
+        }
+        .changeType.REMOVE {
+            background-color: #a41e22;
+        }
+        .changeType.UPDATE {
+            background-color: #c5862b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="body">
+    <div class="title">
+        <h1>{{title}}</h1>
+        <div><b>{{oldInfo.version}}</b> vs <b>{{newInfo.version}}</b></div>
+    </div>
+
+    {{^tags.isEmpty}}
+    <div class="section">Operations</div>
+    {{#tags}}
+    <div class="tag">
+        <h2>{{tag}}</h2>
+
+        {{#operations}}
+        <div class="operation">
+            <span class="breaking" breaking="{{breaking}}"></span>
+            <span class="changeType {{type}}">{{type}}</span>
+            <span class="path">{{method}} {{path}}</span>
+            <span class="operationId">{{operationId}}</span>
+        </div>
+
+        {{^changes.isEmpty}}
+        <table class="changes">
+            <tr>
+                <th></th>
+                <th width="15%">{{oldInfo.version}}</th>
+                <th width="15%">{{newInfo.version}}</th>
+            </tr>
+            {{#changes}}
+            <tr>
+                <td>
+                    <span class="breaking" breaking="{{breaking}}"></span>
+                    <span class="changeType {{type}}">{{type}}</span>
+                    {{path}}
+                </td>
+                <td>{{oldValue}}</td>
+                <td>{{newValue}}</td>
+            </tr>
+            {{/changes}}
+        </table>
+        {{/changes.isEmpty}}
+        {{/operations}}
+    </div>
+    {{/tags}}
+    {{/tags.isEmpty}}
+
+    {{^modelChanges.isEmpty}}
+    <div class="section">Models</div>
+    {{#modelChanges}}
+    <h2>{{typeName}}</h2>
+    <table class="changes">
+        <tr>
+            <th></th>
+            <th width="15%">{{oldInfo.version}}</th>
+            <th width="15%">{{newInfo.version}}</th>
+        </tr>
+        {{#changes}}
+        <tr>
+            <td>
+                <span class="breaking" breaking="{{breaking}}"></span>
+                <span class="changeType {{type}}">{{type}}</span>
+                {{path}}
+            </td>
+            <td>{{oldValue}}</td>
+            <td>{{newValue}}</td>
+        </tr>
+        {{/changes}}
+    </table>
+    {{/modelChanges}}
+    {{/modelChanges.isEmpty}}
+
+</div>
+
+</body>
+</html>

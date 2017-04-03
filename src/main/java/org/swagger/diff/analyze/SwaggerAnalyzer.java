@@ -2,6 +2,7 @@ package org.swagger.diff.analyze;
 
 import io.swagger.models.Model;
 import io.swagger.models.Swagger;
+import org.apache.commons.lang3.StringUtils;
 import org.swagger.diff.model.*;
 
 import java.util.HashMap;

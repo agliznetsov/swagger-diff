@@ -5,10 +5,8 @@ import io.swagger.models.Model;
 import io.swagger.models.Response;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.Parameter;
-import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.refs.GenericRef;
 import org.apache.commons.lang3.StringUtils;
 import org.swagger.diff.model.Change;
 import org.swagger.diff.model.OperationChange;
@@ -41,21 +39,21 @@ public class OperationAnalyzer {
     private void checkMethod() {
         change.method = newOperation.method;
         if (oldOperation.method != newOperation.method) {
-            change.changes.add(new Change(UPDATE, true, null, "method", oldOperation.method.toString(), newOperation.method.toString()));
+            change.changes.add(new Change(UPDATE, true, "method", oldOperation.method.toString(), newOperation.method.toString()));
         }
     }
 
     private void checkPath() {
         change.path = newOperation.path;
         if (!StringUtils.equals(oldOperation.path, newOperation.path)) {
-            change.changes.add(new Change(UPDATE, true, null, "path", oldOperation.path, newOperation.path));
+            change.changes.add(new Change(UPDATE, true, "path", oldOperation.path, newOperation.path));
         }
     }
 
     private void checkTag() {
         change.tag = newOperation.tag;
         if (!StringUtils.equals(oldOperation.path, newOperation.path)) {
-            change.changes.add(new Change(UPDATE, false, null, "tag", oldOperation.tag, newOperation.tag));
+            change.changes.add(new Change(UPDATE, false, "tag", oldOperation.tag, newOperation.tag));
         }
     }
 
@@ -63,13 +61,13 @@ public class OperationAnalyzer {
         CollectionAnalyzer<String, Parameter, Change> ca = new CollectionAnalyzer<>();
         ca.oldKeys = oldOperation.parameters;
         ca.newKeys = newOperation.parameters;
-        ca.add = (key, value) -> new Change(ADD, value.getRequired(), "parameter", key, null, null);
-        ca.remove = (key, value) -> new Change(REMOVE, value.getRequired(), "parameter", key, null, null);
+        ca.add = (key, value) -> new Change(ADD, value.getRequired(), "parameter." + key, null, getParameterType(value));
+        ca.remove = (key, value) -> new Change(REMOVE, value.getRequired(), "parameter." + key, getParameterType(value), null);
         ca.update = (it) -> {
-            String oldType = getQueryParameterType(oldOperation, it);
-            String newType = getQueryParameterType(newOperation, it);
+            String oldType = getParameterType(oldOperation.parameters.get(it));
+            String newType = getParameterType(newOperation.parameters.get(it));
             if (!StringUtils.equals(oldType, newType)) {
-                return new Change(UPDATE, false, "parameter", it, oldType, newType);
+                return new Change(UPDATE, true, "parameter." + it, oldType, newType);
             } else {
                 return null;
             }
@@ -81,13 +79,13 @@ public class OperationAnalyzer {
         CollectionAnalyzer<String, Response, Change> ca = new CollectionAnalyzer<>();
         ca.oldKeys = oldOperation.operation.getResponses();
         ca.newKeys = newOperation.operation.getResponses();
-        ca.add = (key, value) -> new Change(ADD, false, "response", key, null, null);
-        ca.remove = (key, value) -> new Change(REMOVE, false, "response", key, null, null);
+        ca.add = (key, value) -> new Change(ADD, false, "response." + key, null, null);
+        ca.remove = (key, value) -> new Change(REMOVE, false, "response." + key, null, null);
         ca.update = (it) -> {
             String oldType = getResponseType(oldOperation, it);
             String newType = getResponseType(newOperation, it);
             if (!StringUtils.equals(oldType, newType)) {
-                return new Change(UPDATE, false, "response", it, oldType, newType);
+                return new Change(UPDATE, false, "response." + it, oldType, newType);
             } else {
                 return null;
             }
@@ -95,8 +93,7 @@ public class OperationAnalyzer {
         change.changes.addAll(ca.run());
     }
 
-    private String getQueryParameterType(SwaggerOperation operation, String key) {
-        Parameter parameter = operation.parameters.get(key);
+    private String getParameterType(Parameter parameter) {
         if (parameter instanceof SerializableParameter) {
             return ((SerializableParameter) parameter).getType();
         } else if (parameter instanceof BodyParameter) {

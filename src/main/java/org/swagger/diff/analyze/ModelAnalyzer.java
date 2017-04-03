@@ -30,13 +30,13 @@ public class ModelAnalyzer {
         CollectionAnalyzer<String, Property, Change> ca = new CollectionAnalyzer<>();
         ca.oldKeys = oldModel.getProperties();
         ca.newKeys = newModel.getProperties();
-        ca.add = (key, value) -> new Change(ADD, false, "property", key, null, null);
-        ca.remove = (key, value) -> new Change(REMOVE, true, "property", key, null, null);
+        ca.add = (key, value) -> new Change(ADD, false, key, null, getType(value));
+        ca.remove = (key, value) -> new Change(REMOVE, true, key, getType(value), null);
         ca.update = (it) -> {
             String oldType = getType(oldModel.getProperties().get(it));
             String newType = getType(newModel.getProperties().get(it));
             if (!StringUtils.equals(oldType, newType)) {
-                return new Change(UPDATE, false, "property", it, oldType, newType);
+                return new Change(UPDATE, false, it, oldType, newType);
             } else {
                 return null;
             }
